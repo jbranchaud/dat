@@ -18,15 +18,15 @@ func main() {
 
 	rows, _ := conn.Query("select 1")
 
-	for rows.Next() {
-		var num int32
-		err := rows.Scan(&num)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
-			os.Exit(1)
-		}
-		fmt.Printf("num: %d\n", num)
+	var num int32
+	rows.Next()
+	err = rows.Scan(&num)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
+		os.Exit(1)
 	}
+	rows.Close()
+	fmt.Printf("num: %d\n", num)
 }
 
 func extractConfig() pgx.ConnConfig {
