@@ -28,13 +28,16 @@ func main() {
 	rows.Close()
 	fmt.Printf("num: %d\n", num)
 
-	fmt.Printf("database name: %s\n", db_name())
+	database_name := db_name()
+	fmt.Printf("database name: %s\n", database_name)
+	fmt.Printf("database size: %s\n", db_size(database_name))
 }
 
 func extractConfig() pgx.ConnConfig {
 	var config pgx.ConnConfig
 
 	config.Host = "localhost"
+	config.Database = "hr_hotels"
 
 	return config
 }
@@ -52,4 +55,24 @@ func db_name() string {
 	rows.Close()
 
 	return name
+}
+
+func db_size(database_name string) string {
+	query := fmt.Sprintf("select pg_size_pretty(pg_database_size('%s'))", database_name)
+	rows, err := conn.Query(query)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
+		os.Exit(1)
+	}
+
+	var size string
+	rows.Next()
+	err = rows.Scan(&size)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
+		os.Exit(1)
+	}
+	rows.Close()
+
+	return size
 }
