@@ -37,6 +37,7 @@ func extractConfig() pgx.ConnConfig {
 	var config pgx.ConnConfig
 
 	config.Host = "localhost"
+	// move to a config file or a command-line argument
 	config.Database = "hr_hotels"
 
 	return config
