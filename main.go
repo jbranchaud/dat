@@ -31,6 +31,8 @@ func main() {
 	database_name := db_name()
 	fmt.Printf("database name: %s\n", database_name)
 	fmt.Printf("database size: %s\n", db_size(database_name))
+	public_tables := tables_by_schema("public")
+	fmt.Printf("public tables: %v\n", public_tables)
 }
 
 func extractConfig() pgx.ConnConfig {
@@ -76,4 +78,26 @@ func db_size(database_name string) string {
 	rows.Close()
 
 	return size
+}
+
+func tables_by_schema(schema_name string) []string {
+	query := fmt.Sprintf("select table_name from information_schema.tables where table_schema = '%s'", schema_name)
+	rows, err := conn.Query(query)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
+		os.Exit(1)
+	}
+
+	var tables []string
+	for rows.Next() {
+		var table_name string
+		err = rows.Scan(&table_name)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
+			os.Exit(1)
+		}
+		tables = append(tables, table_name)
+	}
+
+	return tables
 }
