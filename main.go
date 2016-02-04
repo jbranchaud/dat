@@ -27,6 +27,8 @@ func main() {
 	}
 	rows.Close()
 	fmt.Printf("num: %d\n", num)
+
+	fmt.Printf("database name: %s\n", db_name())
 }
 
 func extractConfig() pgx.ConnConfig {
@@ -35,4 +37,19 @@ func extractConfig() pgx.ConnConfig {
 	config.Host = "localhost"
 
 	return config
+}
+
+func db_name() string {
+	rows, _ := conn.Query("select current_database()")
+
+	var name string
+	rows.Next()
+	err := rows.Scan(&name)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
+		os.Exit(1)
+	}
+	rows.Close()
+
+	return name
 }
