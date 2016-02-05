@@ -9,16 +9,26 @@ import (
 var conn *pgx.Conn
 
 func main() {
+	// get the database as the first command-line argument
+	if len(os.Args) <= 1 {
+		fmt.Fprintf(os.Stderr, "Expected the name of a database as a command-line argument, but got nothing\n")
+		os.Exit(1)
+	}
+	database_name := os.Args[1]
+
+	pgxConfig := extractConfig()
+	pgxConfig.Database = database_name
+
 	var err error
-	conn, err = pgx.Connect(extractConfig())
+	conn, err = pgx.Connect(pgxConfig)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to the database: %v\n", err)
 		os.Exit(1)
 	}
 
-	database_name := db_name()
-	fmt.Printf("database name: %s\n", database_name)
-	fmt.Printf("database size: %s\n", db_size(database_name))
+	db_name := db_name()
+	fmt.Printf("database name: %s\n", db_name)
+	fmt.Printf("database size: %s\n", db_size(db_name))
 	public_tables := tables_by_schema("public")
 	fmt.Printf("public tables: %v\n", public_tables)
 }
@@ -27,8 +37,6 @@ func extractConfig() pgx.ConnConfig {
 	var config pgx.ConnConfig
 
 	config.Host = "localhost"
-	// move to a config file or a command-line argument
-	config.Database = "hr_hotels"
 
 	return config
 }
