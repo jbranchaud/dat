@@ -16,18 +16,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	rows, _ := conn.Query("select 1")
-
-	var num int32
-	rows.Next()
-	err = rows.Scan(&num)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
-		os.Exit(1)
-	}
-	rows.Close()
-	fmt.Printf("num: %d\n", num)
-
 	database_name := db_name()
 	fmt.Printf("database name: %s\n", database_name)
 	fmt.Printf("database size: %s\n", db_size(database_name))
