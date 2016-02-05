@@ -26,11 +26,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	db_name := db_name()
-	fmt.Printf("database name: %s\n", db_name)
-	fmt.Printf("database size: %s\n", db_size(db_name))
-	public_tables := tables_by_schema("public")
-	fmt.Printf("public tables: %v\n", public_tables)
+	dbName := selectDatabaseName()
+	fmt.Printf("database name: %s\n", dbName)
+	fmt.Printf("database size: %s\n", selectDatabaseSize(dbName))
+	publicTables := selectTablesBySchema("public")
+	fmt.Printf("public tables: %v\n", publicTables)
 }
 
 func extractConfig() pgx.ConnConfig {
@@ -41,7 +41,7 @@ func extractConfig() pgx.ConnConfig {
 	return config
 }
 
-func db_name() string {
+func selectDatabaseName() string {
 	rows, _ := conn.Query("select current_database()")
 
 	var name string
@@ -56,8 +56,8 @@ func db_name() string {
 	return name
 }
 
-func db_size(database_name string) string {
-	query := fmt.Sprintf("select pg_size_pretty(pg_database_size('%s'))", database_name)
+func selectDatabaseSize(databaseName string) string {
+	query := fmt.Sprintf("select pg_size_pretty(pg_database_size('%s'))", databaseName)
 	rows, err := conn.Query(query)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
@@ -76,8 +76,8 @@ func db_size(database_name string) string {
 	return size
 }
 
-func tables_by_schema(schema_name string) []string {
-	query := fmt.Sprintf("select table_name from information_schema.tables where table_schema = '%s'", schema_name)
+func selectTablesBySchema(schemaName string) []string {
+	query := fmt.Sprintf("select table_name from information_schema.tables where table_schema = '%s'", schemaName)
 	rows, err := conn.Query(query)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
@@ -86,13 +86,13 @@ func tables_by_schema(schema_name string) []string {
 
 	var tables []string
 	for rows.Next() {
-		var table_name string
-		err = rows.Scan(&table_name)
+		var tableName string
+		err = rows.Scan(&tableName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
 			os.Exit(1)
 		}
-		tables = append(tables, table_name)
+		tables = append(tables, tableName)
 	}
 
 	return tables
