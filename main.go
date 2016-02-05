@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx"
 	"os"
+	"time"
 )
 
 var conn *pgx.Conn
@@ -27,6 +28,8 @@ func main() {
 	}
 
 	dbName := selectDatabaseName()
+	initiateDeepAnalysis(dbName)
+	// print a bunch of stats about the database
 	fmt.Printf("database name: %s\n", dbName)
 	fmt.Printf("database size: %s\n", selectDatabaseSize(dbName))
 	publicTables := selectTablesBySchema("public")
@@ -96,4 +99,16 @@ func selectTablesBySchema(schemaName string) []string {
 	}
 
 	return tables
+}
+
+func initiateDeepAnalysis(dbName string) {
+	fmt.Printf("Initiating deep analysis of '%s'", dbName)
+	time.Sleep(2000 * time.Millisecond)
+	fmt.Printf(".")
+	time.Sleep(1000 * time.Millisecond)
+	fmt.Printf(".")
+	time.Sleep(1000 * time.Millisecond)
+	fmt.Printf(".")
+	time.Sleep(1000 * time.Millisecond)
+	fmt.Printf("\n")
 }
