@@ -33,7 +33,8 @@ func main() {
 	fmt.Printf("database name: %s\n", dbName)
 	fmt.Printf("database size: %s\n", selectDatabaseSize(dbName))
 	publicTables := selectTablesBySchema("public")
-	fmt.Printf("public tables: %v\n", publicTables)
+	fmt.Printf("the 'public' schema contains %d tables\n", len(publicTables))
+	printTables(publicTables)
 }
 
 func extractConfig() pgx.ConnConfig {
@@ -99,6 +100,12 @@ func selectTablesBySchema(schemaName string) []string {
 	}
 
 	return tables
+}
+
+func printTables(tables []string) {
+	for i := 0; i < len(tables); i++ {
+		fmt.Printf("  - %s\n", tables[i])
+	}
 }
 
 func initiateDeepAnalysis(dbName string) {
