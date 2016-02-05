@@ -35,6 +35,8 @@ func main() {
 	publicTables := selectTablesBySchema("public")
 	fmt.Printf("the 'public' schema contains %d tables\n", len(publicTables))
 	printTables(publicTables)
+	fmt.Printf("\n-----\n")
+	printTableColumns("public", publicTables)
 }
 
 func extractConfig() pgx.ConnConfig {
@@ -102,9 +104,41 @@ func selectTablesBySchema(schemaName string) []string {
 	return tables
 }
 
+func selectColumnNames(schemaName string, tableName string) []string {
+	query := fmt.Sprintf("select column_name from information_schema.columns where table_schema = '%s' and table_name = '%s';", schemaName, tableName)
+	rows, err := conn.Query(query)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
+		os.Exit(1)
+	}
+
+	var columns []string
+	for rows.Next() {
+		var columnName string
+		err = rows.Scan(&columnName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
+			os.Exit(1)
+		}
+		columns = append(columns, columnName)
+	}
+
+	return columns
+}
+
 func printTables(tables []string) {
 	for i := 0; i < len(tables); i++ {
 		fmt.Printf("  - %s\n", tables[i])
+	}
+}
+
+func printTableColumns(schemaName string, tables []string) {
+	for i := 0; i < len(tables); i++ {
+		columns := selectColumnNames(schemaName, tables[i])
+		fmt.Printf("## %s (%d)\n", tables[i], len(columns))
+		for j := 0; j < len(columns); j++ {
+			fmt.Printf("   - %s\n", columns[j])
+		}
 	}
 }
 
