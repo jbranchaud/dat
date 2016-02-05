@@ -9,7 +9,7 @@ import (
 var conn *pgx.Conn
 
 func main() {
-	// get the database as the first command-line argument
+	// get the database name as the first command-line argument
 	if len(os.Args) <= 1 {
 		fmt.Fprintf(os.Stderr, "Expected the name of a database as a command-line argument, but got nothing\n")
 		os.Exit(1)
