@@ -17,5 +17,5 @@ $ go build
 ## Run
 
 ```
-$ ./db-stats
+$ ./db-stats <database name>
 ```
