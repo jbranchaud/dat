@@ -104,23 +104,27 @@ func selectTablesBySchema(schemaName string) []string {
 	return tables
 }
 
-func selectColumnNames(schemaName string, tableName string) []string {
-	query := fmt.Sprintf("select column_name from information_schema.columns where table_schema = '%s' and table_name = '%s';", schemaName, tableName)
+func selectColumnData(schemaName string, tableName string) [][2]string {
+	query := fmt.Sprintf("select column_name, data_type from information_schema.columns where table_schema = '%s' and table_name = '%s';", schemaName, tableName)
 	rows, err := conn.Query(query)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
 		os.Exit(1)
 	}
 
-	var columns []string
+	var columns [][2]string
 	for rows.Next() {
 		var columnName string
-		err = rows.Scan(&columnName)
+		var columnType string
+		err = rows.Scan(&columnName, &columnType)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
 			os.Exit(1)
 		}
-		columns = append(columns, columnName)
+		var data [2]string
+		data[0] = columnName
+		data[1] = columnType
+		columns = append(columns, data)
 	}
 
 	return columns
@@ -134,10 +138,10 @@ func printTables(tables []string) {
 
 func printTableColumns(schemaName string, tables []string) {
 	for i := 0; i < len(tables); i++ {
-		columns := selectColumnNames(schemaName, tables[i])
+		columns := selectColumnData(schemaName, tables[i])
 		fmt.Printf("## %s (%d)\n", tables[i], len(columns))
 		for j := 0; j < len(columns); j++ {
-			fmt.Printf("   - %s\n", columns[j])
+			fmt.Printf("   - %s [%s]\n", columns[j][0], columns[j][1])
 		}
 	}
 }
