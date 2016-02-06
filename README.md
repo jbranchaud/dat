@@ -1,6 +1,6 @@
 # db-stats
 
-> rundown of a PostgreSQL database
+> PostgreSQL Database Analysis Tool
 
 ## Dependencies
 
