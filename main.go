@@ -9,6 +9,11 @@ import (
 
 var conn *pgx.Conn
 
+type column struct {
+	name     string
+	dataType string
+}
+
 func main() {
 	// get the database name as the first command-line argument
 	if len(os.Args) <= 1 {
@@ -104,7 +109,7 @@ func selectTablesBySchema(schemaName string) []string {
 	return tables
 }
 
-func selectColumnData(schemaName string, tableName string) [][2]string {
+func selectColumnData(schemaName string, tableName string) []column {
 	query := fmt.Sprintf("select column_name, data_type from information_schema.columns where table_schema = '%s' and table_name = '%s';", schemaName, tableName)
 	rows, err := conn.Query(query)
 	if err != nil {
@@ -112,7 +117,7 @@ func selectColumnData(schemaName string, tableName string) [][2]string {
 		os.Exit(1)
 	}
 
-	var columns [][2]string
+	var columns []column
 	for rows.Next() {
 		var columnName string
 		var columnType string
@@ -121,10 +126,7 @@ func selectColumnData(schemaName string, tableName string) [][2]string {
 			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
 			os.Exit(1)
 		}
-		var data [2]string
-		data[0] = columnName
-		data[1] = columnType
-		columns = append(columns, data)
+		columns = append(columns, column{name: columnName, dataType: columnType})
 	}
 
 	return columns
@@ -141,7 +143,7 @@ func printTableColumns(schemaName string, tables []string) {
 		columns := selectColumnData(schemaName, tables[i])
 		fmt.Printf("## %s (%d)\n", tables[i], len(columns))
 		for j := 0; j < len(columns); j++ {
-			fmt.Printf("   - %s [%s]\n", columns[j][0], columns[j][1])
+			fmt.Printf("   - %s [%s]\n", columns[j].name, columns[j].dataType)
 		}
 	}
 }
