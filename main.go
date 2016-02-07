@@ -119,14 +119,13 @@ func selectColumnData(schemaName string, tableName string) []column {
 
 	var columns []column
 	for rows.Next() {
-		var columnName string
-		var columnType string
-		err = rows.Scan(&columnName, &columnType)
+		var c column
+		err = rows.Scan(&c.name, &c.dataType)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
 			os.Exit(1)
 		}
-		columns = append(columns, column{name: columnName, dataType: columnType})
+		columns = append(columns, c)
 	}
 
 	return columns
