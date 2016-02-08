@@ -1,4 +1,4 @@
-package main
+package dbstats
 
 import (
 	"fmt"
@@ -32,11 +32,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	dbName := selectDatabaseName()
-	initiateDeepAnalysis(dbName)
+	db := AnalyzeDatabase(conn)
+	initiateDeepAnalysis(db.name)
 	// print a bunch of stats about the database
-	fmt.Printf("database name: %s\n", dbName)
-	fmt.Printf("database size: %s\n", selectDatabaseSize(dbName))
+	fmt.Printf("database name: %s\n", db.name)
+	fmt.Printf("database size: %s\n", db.size)
 	publicTables := selectTablesBySchema("public")
 	fmt.Printf("the 'public' schema contains %d tables\n", len(publicTables))
 	printTables(publicTables)
@@ -50,41 +50,6 @@ func extractConfig() pgx.ConnConfig {
 	config.Host = "localhost"
 
 	return config
-}
-
-func selectDatabaseName() string {
-	rows, _ := conn.Query("select current_database()")
-
-	var name string
-	rows.Next()
-	err := rows.Scan(&name)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
-		os.Exit(1)
-	}
-	rows.Close()
-
-	return name
-}
-
-func selectDatabaseSize(databaseName string) string {
-	query := fmt.Sprintf("select pg_size_pretty(pg_database_size('%s'))", databaseName)
-	rows, err := conn.Query(query)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
-		os.Exit(1)
-	}
-
-	var size string
-	rows.Next()
-	err = rows.Scan(&size)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
-		os.Exit(1)
-	}
-	rows.Close()
-
-	return size
 }
 
 func selectTablesBySchema(schemaName string) []string {
