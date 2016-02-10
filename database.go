@@ -21,8 +21,7 @@ func AnalyzeDatabase(conn *pgx.Conn) *Database {
 }
 
 func selectDatabaseName(conn *pgx.Conn) string {
-	rows, _ := conn.Query("select current_database()")
-	rows, err := conn.Query(query)
+	rows, err := conn.Query("select current_database()")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
 		os.Exit(1)
