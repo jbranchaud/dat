@@ -44,6 +44,25 @@ func main() {
 	printTableColumns("public", publicTables)
 }
 
+func selectRow(query string) string {
+	rows, err := conn.Query(query)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to query database: %v\n", err)
+		os.Exit(1)
+	}
+
+	var result string
+	rows.Next()
+	err = rows.Scan(&result)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to scan query result: %v\n", err)
+		os.Exit(1)
+	}
+	rows.Close()
+
+	return result
+}
+
 func extractConfig() pgx.ConnConfig {
 	var config pgx.ConnConfig
 
